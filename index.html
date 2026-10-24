@@ -29,7 +29,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .nav-in{max-width:480px;margin:0 auto;padding:10px 18px;display:flex;align-items:center;justify-content:space-between}
 .nav-logo{width:36px;height:36px}
 .tabs{display:flex;gap:2px}
-.tabs a{color:var(--ink);text-decoration:none;padding:4px 11px;border-radius:var(--r-sm);border:3px solid transparent}
+.tabs a{color:var(--ink);text-decoration:none;padding:4px 9px;border-radius:var(--r-sm);border:3px solid transparent}
 .tabs a.on{background:var(--coral);border-color:var(--ink)}
 a:focus-visible,button:focus-visible,label:focus-within{outline:3px dashed var(--ink);outline-offset:3px}
 
@@ -190,6 +190,54 @@ h2 svg{width:30px;height:30px}
 .lb{position:fixed;inset:0;z-index:50;background:rgba(62,58,57,.85);display:none;place-items:center;padding:24px;cursor:zoom-out}
 .lb.on{display:grid}
 .lb img{max-width:100%;max-height:85vh;border:3px solid #fff;border-radius:16px;background:#fff}
+
+/* 記帳 */
+.pay-row{margin-top:8px;padding-top:8px;border-top:2px dashed #d8d2cf}
+.pay-row > span{font-size:.75rem;color:var(--ink-soft)}
+.pay-in{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:2px}
+.pay-in label{font-size:.72rem;color:var(--ink-soft);display:flex;flex-direction:column;gap:2px}
+.pay-in input,.add-exp input,.add-exp select{font:inherit;font-size:16px;color:var(--ink);border:2.5px solid var(--ink);border-radius:10px;padding:3px 8px;width:100%;background:#FFFCF6}
+.spent{font-size:.72rem;border:2px solid var(--ink);border-radius:var(--r-sm);padding:0 7px;background:#E8F1E0}
+.spent:empty{display:none}
+.seg{display:inline-flex;border:2.5px solid var(--ink);border-radius:var(--r-sm);overflow:hidden;margin-top:6px}
+.seg button{font:inherit;font-size:.78rem;border:0;background:#fff;color:var(--ink);padding:2px 12px;cursor:pointer}
+.seg button+button{border-left:2.5px solid var(--ink)}
+.seg button.on{background:var(--yellow)}
+.money-sum{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px}
+.money-sum .sum-box b{font-size:1.1rem}
+.money-sum .total{grid-column:1/-1;background:var(--yellow)}
+.money-sum .total b{font-size:1.5rem}
+.mtable{width:100%;border-collapse:collapse;font-size:.85rem}
+.mtable th{font-weight:normal;color:var(--ink-soft);text-align:right;padding:4px 4px;font-size:.75rem}
+.mtable th:first-child,.mtable td:first-child{text-align:left}
+.mtable td{text-align:right;padding:6px 4px;border-top:2px dashed #d8d2cf;white-space:nowrap}
+.mtable td small{display:block;color:var(--ink-soft);font-size:.7rem}
+.mtable tr.tot td{border-top:3px solid var(--ink)}
+.over{color:#C4554A}.under{color:#4F8A3C}
+.add-exp{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.add-exp .full{grid-column:1/-1}
+.add-exp label{font-size:.72rem;color:var(--ink-soft);display:flex;flex-direction:column;gap:2px}
+.btn{font:inherit;color:var(--ink);border:var(--line);border-radius:var(--r-sm);background:var(--green);padding:6px 16px;cursor:pointer}
+.btn.plain{background:#fff}
+.elist{list-style:none;margin:10px 0 0;padding:0}
+.elist li{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:2px dashed #d8d2cf;font-size:.88rem}
+.elist li span:first-child{flex:1;min-width:0}
+.elist small{color:var(--ink-soft)}
+.del{font:inherit;border:2px solid var(--ink);border-radius:50%;width:26px;height:26px;background:#fff;cursor:pointer;padding:0;line-height:1;color:var(--ink)}
+.mtag{font-size:.7rem;border:2px solid var(--ink);border-radius:var(--r-sm);padding:0 6px}
+.mtag.cash{background:var(--yellow)}.mtag.card{background:var(--water)}
+details.detail summary{cursor:pointer;color:var(--ink-soft);font-size:.85rem;margin-top:12px}
+/* 幣別、換匯 */
+.cur{display:inline-flex;margin-top:4px;border-width:2px}
+.cur button{font-size:.7rem;padding:0 8px}
+.pay-in label .cur{align-self:flex-start}
+.money-sum .total small.sub2{display:block;color:var(--ink);font-size:.8rem;margin-top:2px}
+.sum-box .two{display:block;font-size:.78rem;color:var(--ink-soft)}
+.rate-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:.88rem}
+.rate-row input{font:inherit;font-size:16px;width:96px;border:2.5px solid var(--ink);border-radius:10px;padding:3px 8px;background:#FFFCF6;color:var(--ink)}
+.rate-row small{color:var(--ink-soft);width:100%}
+.fx-info{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.mtag.twd{background:#F9DCD6}
 /* prep */
 .check{list-style:none;margin:0;padding:0}
 .check li+li{margin-top:10px}
@@ -264,6 +312,7 @@ h2 svg{width:30px;height:30px}
       <a href="#days" data-sec="days" class="on">行程</a>
       <a href="#prep" data-sec="prep">準備</a>
       <a href="#shop" data-sec="shop">購物</a>
+      <a href="#money" data-sec="money">記帳</a>
     </div>
   </div>
 </nav>
@@ -389,6 +438,52 @@ h2 svg{width:30px;height:30px}
     <div id="shopList"></div>
   </section>
 
+  <section id="money">
+    <h2><svg viewBox="0 0 30 30" aria-hidden="true"><rect x="3" y="7" width="24" height="17" rx="5" fill="#B9DAA5" stroke="#3E3A39" stroke-width="3"/><circle cx="15" cy="15.5" r="4" fill="#fff" stroke="#3E3A39" stroke-width="2.5"/></svg>花費紀錄</h2>
+    <div class="money-sum">
+      <div class="sum-box total"><small>總共花了（換算台幣）</small><b id="mTotal">–</b><small class="sub2" id="mTotalSub"></small></div>
+      <div class="sum-box"><small>現金</small><b id="mCash">0</b><span class="two">韓元</span></div>
+      <div class="sum-box"><small>刷卡</small><b id="mCard">0</b><span class="two" id="mCardTwd">韓元</span></div>
+      <div class="sum-box"><small>未標示</small><b id="mNone">0</b><span class="two">韓元</span></div>
+    </div>
+    <div class="card">
+      <div class="rate-row">換算匯率：1 台幣 ＝ <input id="mRate" inputmode="decimal" placeholder="例如 43"> 韓元<small id="mRateHint"></small></div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <table class="mtable"><thead><tr><th>日期</th><th>現金</th><th>刷卡</th><th>合計</th></tr></thead><tbody id="mDays"></tbody></table>
+      <p style="margin:8px 0 0;font-size:.75rem;color:var(--ink-soft)">表格金額為韓元；台幣付款的部分另外標示在小字。</p>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div style="margin-bottom:8px">新增其他花費</div>
+      <div class="add-exp">
+        <label>日期<select id="xDay"></select></label>
+        <label>金額<input id="xAmt" inputmode="numeric" placeholder="例如 15000"></label>
+        <label class="full">項目<input id="xName" placeholder="例如 加油、停車費、便利商店"></label>
+        <div class="full" style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <div class="seg" id="xPay"><button data-m="cash" class="on">現金</button><button data-m="card">刷卡</button></div>
+            <div class="seg" id="xCur"><button data-c="KRW" class="on">韓元</button><button data-c="TWD">台幣</button></div>
+          </div>
+          <button class="btn" id="xAdd">新增</button>
+        </div>
+      </div>
+      <ul class="elist" id="xList"></ul>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div style="margin-bottom:8px">換匯紀錄</div>
+      <div class="add-exp">
+        <label>付出台幣<input id="fTwd" inputmode="numeric" placeholder="例如 10000"></label>
+        <label>換到韓元<input id="fKrw" inputmode="numeric" placeholder="例如 430000"></label>
+        <label class="full">地點<input id="fWhere" placeholder="例如 台灣銀行、濟州機場換錢所"></label>
+        <div class="full" style="text-align:right"><button class="btn" id="fAdd">新增換匯</button></div>
+      </div>
+      <ul class="elist" id="fList"></ul>
+      <div class="fx-info" id="fInfo"></div>
+    </div>
+    <details class="detail"><summary>查看每一筆明細</summary><div class="card" style="margin-top:8px"><ul class="elist" id="mDetail"></ul></div></details>
+    <p style="text-align:center;margin-top:16px"><button class="btn plain" id="mCsv">匯出 Excel（CSV）</button></p>
+  </section>
+
   <p class="foot">資料來源：Notion</p>
 </main>
 <div class="lb" id="lb" role="dialog" aria-label="放大圖片"><img id="lbImg" alt=""></div>
@@ -439,7 +534,8 @@ const dayIcon = `<svg viewBox="0 0 72 56" aria-hidden="true">
   <path d="M3 40 h66" stroke="#3E3A39" stroke-width="3"/><path d="M4 40 h64 v1 q0 11-14 11 h-36 q-14 0-14-11z" fill="#A8D3E6"/>
   <circle cx="54" cy="16" r="6" fill="#F6D27A" stroke="#3E3A39" stroke-width="2.5"/></svg>`;
 
-const doneKey = (i, s) => `done:${i}|${s.arr}|${s.name}`;
+const doneKey = (i, s) => `done:${i}|${s.name}`;
+Object.keys(saved).forEach(k => { const m = /^done:(\d+)\|[^|]*\|(.+)$/.exec(k); if (m) { const nk = `done:${m[1]}|${m[2]}`; if (saved[nk] === undefined) saved[nk] = saved[k]; delete saved[k]; } });
 const toMin = t => { const m = /^(\d{1,2}):(\d{2})/.exec(t || ""); return m ? +m[1] * 60 + +m[2] : null; };
 function nowInfo(){
   const n = new Date();
@@ -482,12 +578,17 @@ function show(i, quiet){
         <div class="tm">${esc(s.arr)}${s.dep && s.dep !== s.arr ? `<small>${esc(s.dep)} 走</small>` : ""}</div>
         <div class="stop"><div class="box">
           <button class="done-btn" data-done="${esc(dk)}" aria-pressed="${isDone}" aria-label="標記${esc(s.name)}為已完成"></button>
-          <div class="nm">${esc(s.name)}${s.must ? `<span class="must-badge">必去</span>` : ""}${isNow ? `<span class="now-badge">現在</span>` : ""}${s.todo.length ? `<span class="hint">清單 ${s.todo.length}</span>` : ""}<span class="chev" aria-hidden="true">▼</span></div>
+          <div class="nm">${esc(s.name)}${s.must ? `<span class="must-badge">必去</span>` : ""}${isNow ? `<span class="now-badge">現在</span>` : ""}${s.todo.length ? `<span class="hint">清單 ${s.todo.length}</span>` : ""}<span class="spent" data-spent="${esc(`${i}|${s.name}`)}"></span><span class="chev" aria-hidden="true">▼</span></div>
           <div class="more">
           ${s.ko ? `<div class="ko">${esc(s.ko)}</div>` : ""}
           ${metaBits ? `<div class="meta">${metaBits}</div>` : ""}
           ${s.memo ? `<div class="memo">${linkify(s.memo)}</div>` : ""}
           ${todo}
+          <div class="pay-row"><span>實際花費（韓元）</span><div class="pay-in">
+            <label>現金<input inputmode="numeric" data-exp="${esc(`exp:${i}|${s.name}|cash`)}" value="${esc(saved[`exp:${i}|${s.name}|cash`] || "")}" placeholder="0"></label>
+            <label>刷卡<input inputmode="numeric" data-exp="${esc(`exp:${i}|${s.name}|card`)}" value="${esc(saved[`exp:${i}|${s.name}|card`] || "")}" placeholder="0">
+              <span class="seg cur" data-curkey="${esc(`expcur:${i}|${s.name}`)}"><button data-c="KRW" class="${saved[`expcur:${i}|${s.name}`] === "TWD" ? "" : "on"}">韓元</button><button data-c="TWD" class="${saved[`expcur:${i}|${s.name}`] === "TWD" ? "on" : ""}">台幣</button></span></label>
+          </div></div>
           </div>
           ${isDone ? `<span class="stamp${popKey === dk ? " pop" : ""}">去過了</span>` : ""}
         </div></div>
@@ -506,6 +607,7 @@ function show(i, quiet){
   else { view.classList.remove("swap"); void view.offsetWidth; view.innerHTML = head + body; view.classList.add("swap"); }
   popKey = null;
   updateProg();
+  if (window.__moneyReady) updateMoney();
 }
 const startNow = nowInfo();
 show(startNow ? startNow.day : 0);
@@ -513,11 +615,16 @@ if (startNow && startNow.stop >= 0) setTimeout(() => {
   const el = view.querySelector(".tl > li.now");
   if (el) el.scrollIntoView({block: "center", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"});
 }, 400);
-setInterval(() => { if (nowInfo()) show(cur, true); }, 300000);
+setInterval(() => { if (nowInfo() && !(document.activeElement && view.contains(document.activeElement))) show(cur, true); }, 300000);
 view.addEventListener("click", e => {
+  const cb = e.target.closest("[data-curkey] [data-c]");
+  if (cb) { const k = cb.closest("[data-curkey]").dataset.curkey;
+    if (cb.dataset.c === "TWD") saved[k] = "TWD"; else delete saved[k];
+    try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch(err) {}
+    cb.parentElement.querySelectorAll("button").forEach(x => x.classList.toggle("on", x === cb)); updateMoney(); return; }
   const b = e.target.closest(".done-btn");
   if (!b) {
-    if (e.target.closest("a, input, label, .more")) return;
+    if (e.target.closest("a, input, label, .more, .seg")) return;
     const li = e.target.closest(".tl > li[data-key]"); if (!li) return;
     const k = li.dataset.key, open = li.classList.toggle("open");
     if (open) { openSet.add(k); closedSet.delete(k); } else { openSet.delete(k); closedSet.add(k); }
@@ -528,6 +635,13 @@ view.addEventListener("click", e => {
   if (v) { saved[k] = true; popKey = k; } else delete saved[k];
   try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch(err) {}
   show(cur, true);
+});
+view.addEventListener("input", e => {
+  const k = e.target.dataset.exp; if (!k) return;
+  const v = e.target.value.replace(/[^\d]/g, "");
+  if (v) saved[k] = v; else delete saved[k];
+  try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch(err) {}
+  updateMoney();
 });
 view.addEventListener("change", e => {
   if (!e.target.dataset.k) return;
@@ -621,6 +735,7 @@ function renderShop(){
             <label>單價（韓元）<input inputmode="numeric" data-f="price" data-i="${i}" value="${esc(getv(i, "price", x.price))}" placeholder="輸入價格"></label>
           </div>
           <div class="sub" data-sub="${i}"></div>
+          <div class="seg" data-payseg="${i}"><button data-pay="cash" class="${getv(i, "pay", "") === "cash" ? "on" : ""}">現金</button><button data-pay="card" class="${getv(i, "pay", "") === "card" ? "on" : ""}">刷卡</button></div>
           ${todo}
         </div>
       </div>`;
@@ -637,6 +752,7 @@ function updateShop(){
   });
   document.getElementById("sumPaid").textContent = paid.toLocaleString();
   document.getElementById("sumAll").textContent = all.toLocaleString();
+  if (window.__moneyReady) updateMoney();
   document.querySelectorAll("[data-wc]").forEach(el => {
     const idx = SHOP.map((x, i) => i).filter(i => SHOP[i].where === el.dataset.wc);
     el.textContent = `已買 ${idx.filter(i => getv(i, "done", SHOP[i].done)).length}/${idx.length}`;
@@ -653,6 +769,10 @@ shopEl.addEventListener("change", e => {
   const [i, j] = t.dataset.st.split("-"); saved[`shoptodo:${SHOP[+i].n}:${j}`] = t.checked; persist();
 });
 shopEl.addEventListener("click", e => {
+  const pb = e.target.closest("[data-pay]");
+  if (pb) { const i = +pb.closest("[data-payseg]").dataset.payseg, m = pb.dataset.pay;
+    saved[sk(i, "pay")] = getv(i, "pay", "") === m ? "" : m; persist();
+    pb.parentElement.querySelectorAll("button").forEach(x => x.classList.toggle("on", x.dataset.pay === saved[sk(i, "pay")])); updateMoney(); return; }
   const b = e.target.closest("[data-buy]");
   if (b) { const i = +b.dataset.buy; saved[sk(i, "done")] = !getv(i, "done", SHOP[i].done); persist(); renderShop(); return; }
   const p = e.target.closest("[data-img]");
@@ -663,12 +783,128 @@ lb.addEventListener("click", () => lb.classList.remove("on"));
 document.addEventListener("keydown", e => { if (e.key === "Escape") lb.classList.remove("on"); });
 renderShop();
 
+// 花費紀錄
+const DAYN = days.map((d, i) => { const dt = new Date(START); dt.setDate(START.getDate() + i); return `${dt.getMonth()+1}/${dt.getDate()}`; });
+function planRange(c){
+  if (!c) return null;
+  const t = c.replace(/韓元|元|\s|,/g, "").replace(/[～~至]/g, "-");
+  if (/^[\d*+]+$/.test(t)) { const v = t.split("+").reduce((a, p) => a + p.split("*").reduce((x, y) => x * +y, 1), 0); return [v, v]; }
+  const n = (t.match(/\d+/g) || []).map(Number); return n.length ? [n[0], n[n.length - 1]] : null;
+}
+const PLAN = days.map(d => d.stops.reduce((a, s) => { const r = planRange(s.cost); return r ? [a[0] + r[0], a[1] + r[1]] : a; }, [0, 0]));
+if (!Array.isArray(saved.extra)) saved.extra = [];
+if (!Array.isArray(saved.fx)) saved.fx = [];
+let xPay = "cash", xCur = "KRW";
+function allEntries(){
+  const out = [];
+  Object.keys(saved).forEach(k => {
+    const m = /^exp:(\d+)\|(.+)\|(cash|card)$/.exec(k); const a = num(saved[k]);
+    if (m && a) out.push({d: +m[1], t: m[2], a, m: m[3], c: m[3] === "card" && saved[`expcur:${m[1]}|${m[2]}`] === "TWD" ? "TWD" : "KRW", src: "stop"});
+  });
+  saved.extra.forEach((x, j) => out.push({d: x.d, t: x.t || "其他", a: +x.a, m: x.m, c: x.c || "KRW", src: "extra", j}));
+  SHOP.forEach((x, i) => { if (getv(i, "done", x.done)) { const st = subtotal(i); if (st) out.push({d: -1, t: `購物：${x.n}`, a: st, m: getv(i, "pay", "") || "none", c: "KRW", src: "shop"}); } });
+  return out;
+}
+const fmt = n => n ? Math.round(n).toLocaleString() : "–";
+function fxAvg(){ const t = saved.fx.reduce((a, x) => a + +x.t, 0), k = saved.fx.reduce((a, x) => a + +x.k, 0); return t ? k / t : null; }
+function curRate(){ return num(saved.rate) || fxAvg(); }
+function updateMoney(){
+  const E = allEntries(), sum = f => E.filter(f).reduce((a, e) => a + e.a, 0);
+  const K = e => e.c === "KRW", T = e => e.c === "TWD";
+  const krw = sum(K), twd = sum(T), r = curRate();
+  document.getElementById("mTotal").textContent = r ? `NT$ ${fmt(krw / r + twd)}` : (krw || twd ? "請填匯率" : "NT$ 0");
+  document.getElementById("mTotalSub").textContent = `韓元 ${fmt(krw)}${twd ? `　＋　台幣 ${fmt(twd)}` : ""}`;
+  document.getElementById("mCash").textContent = fmt(sum(e => K(e) && e.m === "cash"));
+  document.getElementById("mCard").textContent = fmt(sum(e => K(e) && e.m === "card"));
+  const ct = sum(e => T(e) && e.m === "card");
+  document.getElementById("mCardTwd").textContent = ct ? `韓元，另有台幣 ${fmt(ct)}` : "韓元";
+  document.getElementById("mNone").textContent = fmt(sum(e => K(e) && e.m === "none"));
+  const avg = fxAvg();
+  document.getElementById("mRateHint").textContent = num(saved.rate) ? "使用你輸入的匯率" : avg ? `沒填就用換匯紀錄的平均匯率 ${avg.toFixed(2)}` : "填入後，台幣和韓元會換算成一個總金額";
+  const twdNote = f => { const v = sum(e => T(e) && f(e)); return v ? `<small>＋台幣 ${fmt(v)}</small>` : ""; };
+  const rows = days.map((d, i) => {
+    const c = sum(e => K(e) && e.d === i && e.m === "cash"), k = sum(e => K(e) && e.d === i && e.m === "card"), p = PLAN[i];
+    const pt = p[1] ? `<small class="${c + k > p[1] ? "over" : ""}">預估 ${p[0] === p[1] ? fmt(p[0]) : fmt(p[0]) + "～" + fmt(p[1])}</small>` : "";
+    return `<tr><td>${DAYN[i]}</td><td>${fmt(c)}</td><td>${fmt(k)}${twdNote(e => e.d === i && e.m === "card")}</td><td>${fmt(c + k)}${twdNote(e => e.d === i)}${pt}</td></tr>`;
+  });
+  const sc = sum(e => e.d === -1 && e.m === "cash"), sd = sum(e => e.d === -1 && e.m === "card"), sn = sum(e => e.d === -1 && e.m === "none");
+  if (sc + sd + sn) rows.push(`<tr><td>購物清單</td><td>${fmt(sc)}</td><td>${fmt(sd)}</td><td>${fmt(sc + sd + sn)}${sn ? `<small>${fmt(sn)} 未標示</small>` : ""}</td></tr>`);
+  rows.push(`<tr class="tot"><td>合計</td><td>${fmt(sum(e => K(e) && e.m === "cash"))}</td><td>${fmt(sum(e => K(e) && e.m === "card"))}${twdNote(e => e.m === "card")}</td><td>${fmt(krw)}${twdNote(() => true)}</td></tr>`);
+  document.getElementById("mDays").innerHTML = rows.join("");
+  const tag = (m, c) => (m === "cash" ? `<span class="mtag cash">現金</span>` : m === "card" ? `<span class="mtag card">刷卡</span>` : `<span class="mtag">未標示</span>`) + (c === "TWD" ? `<span class="mtag twd">台幣</span>` : "");
+  const amt = e => e.c === "TWD" ? `NT$ ${(+e.a).toLocaleString()}` : `₩${(+e.a).toLocaleString()}`;
+  document.getElementById("xList").innerHTML = saved.extra.map((x, j) =>
+    `<li><span>${esc(x.t || "其他")}<br><small>${DAYN[x.d] || ""}</small></span>${tag(x.m, x.c)}<span>${amt({a: x.a, c: x.c})}</span><button class="del" data-del="${j}" aria-label="刪除這筆">×</button></li>`).join("");
+  document.getElementById("mDetail").innerHTML = E.length ? [...E].sort((a, b) => a.d - b.d).map(e =>
+    `<li><span>${esc(e.t)}<br><small>${e.d >= 0 ? DAYN[e.d] : "購物清單"}</small></span>${tag(e.m, e.c)}<span>${amt(e)}</span></li>`).join("") : `<li><span>還沒有任何花費紀錄。</span></li>`;
+  document.querySelectorAll("[data-spent]").forEach(el => {
+    const [d, ...n] = el.dataset.spent.split("|"); const name = n.join("|");
+    const at = E.filter(e => e.src === "stop" && e.d === +d && e.t === name);
+    const kv = at.filter(K).reduce((a, e) => a + e.a, 0), tv = at.filter(T).reduce((a, e) => a + e.a, 0);
+    el.textContent = [kv && `₩${kv.toLocaleString()}`, tv && `NT$${tv.toLocaleString()}`].filter(Boolean).join(" ＋ ");
+  });
+  // 換匯
+  document.getElementById("fList").innerHTML = saved.fx.map((x, j) =>
+    `<li><span>${esc(x.w || "換匯")}<br><small>1 台幣 ≈ ${(x.k / x.t).toFixed(2)} 韓元</small></span><span>NT$ ${(+x.t).toLocaleString()} → ₩${(+x.k).toLocaleString()}</span><button class="del" data-fdel="${j}" aria-label="刪除這筆換匯">×</button></li>`).join("");
+  const gotK = saved.fx.reduce((a, x) => a + +x.k, 0), cashK = sum(e => K(e) && e.m === "cash");
+  document.getElementById("fInfo").innerHTML = saved.fx.length ? `
+    <div class="sum-box"><small>總共換到</small><b>${fmt(gotK)}</b><span class="two">韓元（平均 ${avg.toFixed(2)}）</span></div>
+    <div class="sum-box paid"><small>現金大約還剩</small><b>${fmt(gotK - cashK)}</b><span class="two">韓元</span></div>` : "";
+}
+(() => {
+  const sel = document.getElementById("xDay"), nw = nowInfo();
+  sel.innerHTML = DAYN.map((d, i) => `<option value="${i}">${d}（Day ${i + 1}）</option>`).join("");
+  sel.value = nw ? nw.day : 0;
+  const segPick = (id, attr, set) => document.getElementById(id).addEventListener("click", e => {
+    const b = e.target.closest(`[${attr}]`); if (!b) return; set(b.getAttribute(attr));
+    document.querySelectorAll(`#${id} button`).forEach(x => x.classList.toggle("on", x === b));
+  });
+  segPick("xPay", "data-m", v => xPay = v);
+  segPick("xCur", "data-c", v => xCur = v);
+  document.getElementById("xAdd").addEventListener("click", () => {
+    const a = num(document.getElementById("xAmt").value); if (!a) { document.getElementById("xAmt").focus(); return; }
+    saved.extra.push({d: +sel.value, t: document.getElementById("xName").value.trim(), a, m: xPay, c: xCur});
+    persist(); document.getElementById("xAmt").value = ""; document.getElementById("xName").value = ""; updateMoney();
+  });
+  document.getElementById("xList").addEventListener("click", e => {
+    const b = e.target.closest("[data-del]"); if (!b) return;
+    if (!confirm("確定要刪除這一筆嗎？")) return;
+    saved.extra.splice(+b.dataset.del, 1); persist(); updateMoney();
+  });
+  document.getElementById("fAdd").addEventListener("click", () => {
+    const t = num(document.getElementById("fTwd").value), k = num(document.getElementById("fKrw").value);
+    if (!t) { document.getElementById("fTwd").focus(); return; } if (!k) { document.getElementById("fKrw").focus(); return; }
+    saved.fx.push({t, k, w: document.getElementById("fWhere").value.trim()}); persist();
+    ["fTwd","fKrw","fWhere"].forEach(id => document.getElementById(id).value = ""); updateMoney();
+  });
+  document.getElementById("fList").addEventListener("click", e => {
+    const b = e.target.closest("[data-fdel]"); if (!b) return;
+    if (!confirm("確定要刪除這筆換匯紀錄嗎？")) return;
+    saved.fx.splice(+b.dataset.fdel, 1); persist(); updateMoney();
+  });
+  const rate = document.getElementById("mRate"); rate.value = saved.rate || "";
+  rate.addEventListener("input", () => { saved.rate = rate.value.replace(/[^\d.]/g, ""); persist(); updateMoney(); });
+  document.getElementById("mCsv").addEventListener("click", () => {
+    const E = allEntries().sort((a, b) => a.d - b.d), r = curRate();
+    const q = v => `"${String(v).replace(/"/g, '""')}"`;
+    const lines = [["日期","項目","付款方式","幣別","金額","換算台幣"].map(q).join(",")].concat(
+      E.map(e => [e.d >= 0 ? `2026/${DAYN[e.d]}` : "購物清單", e.t, e.m === "cash" ? "現金" : e.m === "card" ? "刷卡" : "未標示",
+        e.c === "TWD" ? "台幣" : "韓元", e.a, e.c === "TWD" ? e.a : (r ? Math.round(e.a / r) : "")].map(q).join(",")),
+      saved.fx.map(x => ["換匯", x.w || "換匯", "", "台幣→韓元", `${x.t}→${x.k}`, ""].map(q).join(",")));
+    const blob = new Blob(["\ufeff" + lines.join("\r\n")], {type: "text/csv"});
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "濟州島花費紀錄.csv";
+    document.body.appendChild(a); a.click(); a.remove();
+  });
+})();
+window.__moneyReady = true;
+updateMoney();
+
 // 選單高亮
 const tabs = [...document.querySelectorAll(".tabs a")];
 const io = new IntersectionObserver(es => es.forEach(en => {
   if (en.isIntersecting) tabs.forEach(t => t.classList.toggle("on", t.dataset.sec === en.target.id));
 }), {rootMargin:"-40% 0px -55% 0px"});
-["flight","days","prep","shop"].forEach(id => io.observe(document.getElementById(id)));
+["flight","days","prep","shop","money"].forEach(id => io.observe(document.getElementById(id)));
 </script>
 </body>
 </html>
