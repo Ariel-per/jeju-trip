@@ -845,7 +845,15 @@ function dayOf(d){
   let t = String(d ?? "").trim(); if (!t) return -1;
   if (/T\d{2}:/.test(t)) { const x = new Date(t); if (!isNaN(x)) t = `${x.getFullYear()}/${x.getMonth() + 1}/${x.getDate()}`; }
   let m = /(\d{4})\s*[\/\-.年]\s*(\d{1,2})\s*[\/\-.月]\s*(\d{1,2})/.exec(t) || /(?:^|\D)(\d{1,2})\s*[\/\-.月]\s*(\d{1,2})(?!\d)/.exec(t);
-  if (!m) return -1;
+  if (!m) {
+    // 例如 Google 試算表回傳的「Thu Dec 10 2026 00:00:00 GMT+0800 (台北標準時間)」
+    const en = /(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+(\d{1,2})(?:,)?\s+\d{4}/i.exec(t);
+    if (en) { const mo2 = "janfebmaraprmayjunjulaugsepoctnovdec".indexOf(en[1].toLowerCase()) / 3 + 1;
+      return DATES.findIndex(v => { const [, M, D] = v.split("/"); return +M === mo2 && +D === +en[2]; }); }
+    const x = new Date(t.replace(/\s*\(.*\)\s*$/, ""));
+    if (isNaN(x)) return -1;
+    return DATES.findIndex(v => { const [, M, D] = v.split("/"); return +M === x.getMonth() + 1 && +D === x.getDate(); });
+  }
   const mo = +(m.length === 4 ? m[2] : m[1]), da = +(m.length === 4 ? m[3] : m[2]);
   return DATES.findIndex(x => { const [, M, D] = x.split("/"); return +M === mo && +D === da; });
 }
