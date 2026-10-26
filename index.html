@@ -833,7 +833,7 @@ document.addEventListener("keydown", e => { if (e.key === "Escape") lb.classList
 renderShop();
 
 // ===== 共同記帳 =====
-const API_URL = "";   // 部署 Apps Script 後填入網址，朋友就只需要輸入通關密碼
+const API_URL = "https://script.google.com/macros/s/AKfycbzkbxTSmuPc6L4PodV_05SScq8B5xuQ261sgjGfdfGqJeQDQoZIvsO5J1K911pc8-wT/exec";   // 部署 Apps Script 後填入網址，朋友就只需要輸入通關密碼
 const DATES = days.map((d, i) => { const dt = new Date(START); dt.setDate(START.getDate() + i); return `${dt.getFullYear()}/${String(dt.getMonth()+1).padStart(2,"0")}/${String(dt.getDate()).padStart(2,"0")}`; });
 const dayOf = d => DATES.indexOf(String(d || "").replace(/-/g, "/"));
 const LKEY = "jeju-ledger-cache", QKEY = "jeju-ledger-queue";
