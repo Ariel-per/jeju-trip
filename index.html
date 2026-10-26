@@ -239,6 +239,41 @@ details.detail summary{cursor:pointer;color:var(--ink-soft);font-size:.85rem;mar
 .rate-row small{color:var(--ink-soft);width:100%}
 .fx-info{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
 .mtag.twd{background:#F9DCD6}
+/* 共同記帳 */
+.sync{display:flex;align-items:center;gap:8px;flex-wrap:wrap;border:var(--line);border-radius:var(--r-md);background:#fff;padding:8px 12px;margin-bottom:14px;font-size:.85rem}
+.sync .dot{width:12px;height:12px;border-radius:50%;border:2px solid var(--ink);background:#ccc;flex:none}
+.sync.ok .dot{background:var(--green)}.sync.wait .dot{background:var(--yellow)}.sync.err .dot{background:var(--coral)}
+.sync span.txt{flex:1;min-width:140px}
+.btn.small{padding:2px 12px;font-size:.82rem;border-width:2.5px}
+.set-card{display:none;margin-bottom:14px}
+.set-card.on{display:block}
+.set-card label{display:flex;flex-direction:column;gap:2px;font-size:.75rem;color:var(--ink-soft);margin-bottom:8px}
+.set-card input,.set-card select,.mform input,.mform select{font:inherit;font-size:16px;color:var(--ink);border:2.5px solid var(--ink);border-radius:10px;padding:4px 8px;width:100%;background:#FFFCF6}
+.chips2{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px}
+.chip2{font:inherit;font-size:.85rem;color:var(--ink);background:#fff;border:2.5px solid var(--ink);border-radius:var(--r-sm);padding:1px 10px;cursor:pointer}
+.chip2.on{background:var(--green)}
+.chip2 .x{margin-left:6px;color:var(--ink-soft)}
+.row2{display:flex;gap:8px}
+.pay-list{list-style:none;margin:4px 0 6px;padding:0;font-size:.82rem}
+.pay-list li{display:flex;align-items:center;gap:6px;padding:3px 0}
+.pay-list li span.w{flex:1;min-width:0;color:var(--ink-soft)}
+.pend{font-size:.68rem;color:#B07A00}
+.settle{margin-top:14px}
+.settle .mtable td{white-space:normal}
+.xfer{list-style:none;margin:10px 0 0;padding:0}
+.xfer li{padding:6px 10px;border:2.5px solid var(--ink);border-radius:12px;background:#FBEFD0;margin-bottom:6px;font-size:.92rem}
+.pos{color:#4F8A3C}.neg{color:#C4554A}
+.sheet-bg{position:fixed;inset:0;background:rgba(62,58,57,.55);z-index:40;display:none}
+.sheet-bg.on{display:block}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;background:var(--paper);border-top:var(--line);border-radius:24px 24px 0 0;padding:16px 18px calc(18px + env(safe-area-inset-bottom,0px));max-height:88vh;overflow:auto;transform:translateY(105%);transition:transform .25s}
+.sheet.on{transform:none}
+.sheet-in{max-width:480px;margin:0 auto}
+.sheet h3{font-weight:normal;margin:0 0 10px;font-size:1.15rem;display:flex;justify-content:space-between;align-items:center}
+.mform{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mform label{display:flex;flex-direction:column;gap:2px;font-size:.75rem;color:var(--ink-soft)}
+.mform .full{grid-column:1/-1}
+.migr{display:none;background:#FBEFD0;margin-bottom:14px}
+.migr.on{display:block}
 /* prep */
 .check{list-style:none;margin:0;padding:0}
 .check li+li{margin-top:10px}
@@ -440,53 +475,80 @@ details.detail summary{cursor:pointer;color:var(--ink-soft);font-size:.85rem;mar
   </section>
 
   <section id="money">
-    <h2><svg viewBox="0 0 30 30" aria-hidden="true"><rect x="3" y="7" width="24" height="17" rx="5" fill="#B9DAA5" stroke="#3E3A39" stroke-width="3"/><circle cx="15" cy="15.5" r="4" fill="#fff" stroke="#3E3A39" stroke-width="2.5"/></svg>花費紀錄</h2>
+    <h2><svg viewBox="0 0 30 30" aria-hidden="true"><rect x="3" y="7" width="24" height="17" rx="5" fill="#B9DAA5" stroke="#3E3A39" stroke-width="3"/><circle cx="15" cy="15.5" r="4" fill="#fff" stroke="#3E3A39" stroke-width="2.5"/></svg>共同記帳</h2>
+    <div class="sync" id="sync"><span class="dot"></span><span class="txt" id="syncTxt">尚未連線</span><button class="btn small plain" id="syncNow">同步</button><button class="btn small plain" id="setBtn">設定</button></div>
+
+    <div class="card set-card" id="setCard">
+      <label>記帳網址（Apps Script）<input id="cfgUrl" placeholder="https://script.google.com/macros/s/……/exec"></label>
+      <label>通關密碼<input id="cfgPass" type="password" autocomplete="off"></label>
+      <label>我是誰（預設付款人）<select id="cfgMe"></select></label>
+      <div style="font-size:.75rem;color:var(--ink-soft)">成員（點 × 移除）</div>
+      <div class="chips2" id="memChips"></div>
+      <div class="row2"><input id="memNew" placeholder="新增成員名字"><button class="btn small" id="memAdd">加入</button></div>
+      <p style="text-align:right;margin:10px 0 0"><button class="btn small" id="cfgSave">儲存並連線</button></p>
+    </div>
+
+    <div class="card migr" id="migr"><div id="migrTxt"></div><p style="text-align:right;margin:8px 0 0"><button class="btn small" id="migrGo">上傳到共同帳本</button></p></div>
+
+    <p style="text-align:center;margin:0 0 14px"><button class="btn" id="addExp">＋ 記一筆花費</button></p>
+
     <div class="money-sum">
-      <div class="sum-box total"><small>總共花了（換算台幣）</small><b id="mTotal">–</b><small class="sub2" id="mTotalSub"></small></div>
+      <div class="sum-box total"><small>大家總共花了（換算台幣）</small><b id="mTotal">–</b><small class="sub2" id="mTotalSub"></small></div>
       <div class="sum-box"><small>現金</small><b id="mCash">0</b><span class="two">韓元</span></div>
       <div class="sum-box"><small>刷卡</small><b id="mCard">0</b><span class="two" id="mCardTwd">韓元</span></div>
-      <div class="sum-box"><small>未標示</small><b id="mNone">0</b><span class="two">韓元</span></div>
+      <div class="sum-box"><small>筆數</small><b id="mCount">0</b><span class="two">筆</span></div>
     </div>
-    <div class="card">
+
+    <div class="card settle">
+      <div style="margin-bottom:6px">分帳結算</div>
+      <div id="settle"></div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
       <div class="rate-row">換算匯率：1 台幣 ＝ <input id="mRate" inputmode="decimal" placeholder="例如 43"> 韓元<small id="mRateHint"></small></div>
     </div>
+
     <div class="card" style="margin-top:14px">
       <table class="mtable"><thead><tr><th>日期</th><th>現金</th><th>刷卡</th><th>合計</th></tr></thead><tbody id="mDays"></tbody></table>
       <p style="margin:8px 0 0;font-size:.75rem;color:var(--ink-soft)">表格金額為韓元；台幣付款的部分另外標示在小字。</p>
     </div>
-    <div class="card" style="margin-top:14px">
-      <div style="margin-bottom:8px">新增其他花費</div>
-      <div class="add-exp">
-        <label>日期<select id="xDay"></select></label>
-        <label>金額<input id="xAmt" inputmode="numeric" placeholder="例如 15000"></label>
-        <label class="full">項目<input id="xName" placeholder="例如 加油、停車費、便利商店"></label>
-        <div class="full" style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
-          <div style="display:flex;gap:6px;flex-wrap:wrap">
-            <div class="seg" id="xPay"><button data-m="cash" class="on">現金</button><button data-m="card">刷卡</button></div>
-            <div class="seg" id="xCur"><button data-c="KRW" class="on">韓元</button><button data-c="TWD">台幣</button></div>
-          </div>
-          <button class="btn" id="xAdd">新增</button>
-        </div>
-      </div>
-      <ul class="elist" id="xList"></ul>
-    </div>
+
     <div class="card" style="margin-top:14px">
       <div style="margin-bottom:8px">換匯紀錄</div>
       <div class="add-exp">
         <label>付出台幣<input id="fTwd" inputmode="numeric" placeholder="例如 10000"></label>
         <label>換到韓元<input id="fKrw" inputmode="numeric" placeholder="例如 430000"></label>
-        <label class="full">地點<input id="fWhere" placeholder="例如 台灣銀行、濟州機場換錢所"></label>
+        <label>誰換的<select id="fWho"></select></label>
+        <label>地點<input id="fWhere" placeholder="例如 台灣銀行"></label>
         <div class="full" style="text-align:right"><button class="btn" id="fAdd">新增換匯</button></div>
       </div>
       <ul class="elist" id="fList"></ul>
       <div class="fx-info" id="fInfo"></div>
     </div>
+
     <details class="detail"><summary>查看每一筆明細</summary><div class="card" style="margin-top:8px"><ul class="elist" id="mDetail"></ul></div></details>
     <p style="text-align:center;margin-top:16px"><button class="btn plain" id="mCsv">匯出 Excel（CSV）</button></p>
   </section>
 
   <p class="foot">資料來源：Notion</p>
 </main>
+<div class="sheet-bg" id="sheetBg"></div>
+<div class="sheet" id="sheet" role="dialog" aria-label="記一筆花費"><div class="sheet-in">
+  <h3><span id="shTitle">記一筆花費</span><button class="del" id="shClose" aria-label="關閉">×</button></h3>
+  <div class="mform">
+    <label>日期<select id="eDay"></select></label>
+    <label>金額<input id="eAmt" inputmode="numeric" placeholder="例如 32000"></label>
+    <label class="full">項目<input id="eItem" placeholder="例如 午餐、加油、停車費"></label>
+    <div class="full" style="display:flex;gap:6px;flex-wrap:wrap">
+      <div class="seg" id="eCur"><button data-v="KRW" class="on">韓元</button><button data-v="TWD">台幣</button></div>
+      <div class="seg" id="eMethod"><button data-v="cash" class="on">現金</button><button data-v="card">刷卡</button></div>
+    </div>
+    <label class="full">誰付的<select id="ePayer"></select></label>
+    <div class="full"><div style="font-size:.75rem;color:var(--ink-soft)">誰要分攤（預設全部人）</div><div class="chips2" id="eSplit"></div></div>
+    <div class="full" id="eWarn" style="font-size:.82rem;color:#C4554A"></div>
+    <div class="full" style="text-align:right"><button class="btn" id="eSave">儲存</button></div>
+  </div>
+</div></div>
 <div class="lb" id="lb" role="dialog" aria-label="放大圖片"><img id="lbImg" alt=""></div>
 
 <script>
@@ -585,11 +647,7 @@ function show(i, quiet){
           ${metaBits ? `<div class="meta">${metaBits}</div>` : ""}
           ${s.memo ? `<div class="memo">${linkify(s.memo)}</div>` : ""}
           ${todo}
-          <div class="pay-row"><span>實際花費（韓元）</span><div class="pay-in">
-            <label>現金<input inputmode="numeric" data-exp="${esc(`exp:${i}|${s.name}|cash`)}" value="${esc(saved[`exp:${i}|${s.name}|cash`] || "")}" placeholder="0"></label>
-            <label>刷卡<input inputmode="numeric" data-exp="${esc(`exp:${i}|${s.name}|card`)}" value="${esc(saved[`exp:${i}|${s.name}|card`] || "")}" placeholder="0">
-              <span class="seg cur" data-curkey="${esc(`expcur:${i}|${s.name}`)}"><button data-c="KRW" class="${saved[`expcur:${i}|${s.name}`] === "TWD" ? "" : "on"}">韓元</button><button data-c="TWD" class="${saved[`expcur:${i}|${s.name}`] === "TWD" ? "on" : ""}">台幣</button></span></label>
-          </div></div>
+          <div class="pay-row"><span>實際花費</span><ul class="pay-list" data-paylist="${esc(`${i}|${s.name}`)}"></ul><button class="btn small" data-addexp="${i}" data-stop="${esc(s.name)}">＋ 記一筆</button></div>
           </div>
           ${isDone ? `<span class="stamp${popKey === dk ? " pop" : ""}">去過了</span>` : ""}
         </div></div>
@@ -618,11 +676,10 @@ if (startNow && startNow.stop >= 0) setTimeout(() => {
 }, 400);
 setInterval(() => { if (nowInfo() && !(document.activeElement && view.contains(document.activeElement))) show(cur, true); }, 300000);
 view.addEventListener("click", e => {
-  const cb = e.target.closest("[data-curkey] [data-c]");
-  if (cb) { const k = cb.closest("[data-curkey]").dataset.curkey;
-    if (cb.dataset.c === "TWD") saved[k] = "TWD"; else delete saved[k];
-    try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch(err) {}
-    cb.parentElement.querySelectorAll("button").forEach(x => x.classList.toggle("on", x === cb)); updateMoney(); return; }
+  const ab = e.target.closest("[data-addexp]");
+  if (ab) { openSheet({day: +ab.dataset.addexp, stop: ab.dataset.stop, item: ab.dataset.stop}); return; }
+  const db = e.target.closest("[data-pdel]");
+  if (db) { delEntry(db.dataset.pdel); return; }
   const b = e.target.closest(".done-btn");
   if (!b) {
     if (e.target.closest("a, input, label, .more, .seg")) return;
@@ -636,13 +693,6 @@ view.addEventListener("click", e => {
   if (v) { saved[k] = true; popKey = k; } else delete saved[k];
   try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch(err) {}
   show(cur, true);
-});
-view.addEventListener("input", e => {
-  const k = e.target.dataset.exp; if (!k) return;
-  const v = e.target.value.replace(/[^\d]/g, "");
-  if (v) saved[k] = v; else delete saved[k];
-  try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch(err) {}
-  updateMoney();
 });
 view.addEventListener("change", e => {
   if (!e.target.dataset.k) return;
@@ -736,7 +786,7 @@ function renderShop(){
             <label>單價（韓元）<input inputmode="numeric" data-f="price" data-i="${i}" value="${esc(getv(i, "price", x.price))}" placeholder="輸入價格"></label>
           </div>
           <div class="sub" data-sub="${i}"></div>
-          <div class="seg" data-payseg="${i}"><button data-pay="cash" class="${getv(i, "pay", "") === "cash" ? "on" : ""}">現金</button><button data-pay="card" class="${getv(i, "pay", "") === "card" ? "on" : ""}">刷卡</button></div>
+          <button class="btn small plain" data-shopexp="${i}" style="margin-top:6px">記到共同帳本</button>
           ${todo}
         </div>
       </div>`;
@@ -770,10 +820,8 @@ shopEl.addEventListener("change", e => {
   const [i, j] = t.dataset.st.split("-"); saved[`shoptodo:${SHOP[+i].n}:${j}`] = t.checked; persist();
 });
 shopEl.addEventListener("click", e => {
-  const pb = e.target.closest("[data-pay]");
-  if (pb) { const i = +pb.closest("[data-payseg]").dataset.payseg, m = pb.dataset.pay;
-    saved[sk(i, "pay")] = getv(i, "pay", "") === m ? "" : m; persist();
-    pb.parentElement.querySelectorAll("button").forEach(x => x.classList.toggle("on", x.dataset.pay === saved[sk(i, "pay")])); updateMoney(); return; }
+  const se = e.target.closest("[data-shopexp]");
+  if (se) { const i = +se.dataset.shopexp, nw = nowInfo(); openSheet({day: nw ? nw.day : 0, item: SHOP[i].n, amount: subtotal(i) || ""}); return; }
   const b = e.target.closest("[data-buy]");
   if (b) { const i = +b.dataset.buy; saved[sk(i, "done")] = !getv(i, "done", SHOP[i].done); persist(); renderShop(); return; }
   const p = e.target.closest("[data-img]");
@@ -784,7 +832,67 @@ lb.addEventListener("click", () => lb.classList.remove("on"));
 document.addEventListener("keydown", e => { if (e.key === "Escape") lb.classList.remove("on"); });
 renderShop();
 
-// 花費紀錄
+// ===== 共同記帳 =====
+const API_URL = "";   // 部署 Apps Script 後填入網址，朋友就只需要輸入通關密碼
+const DATES = days.map((d, i) => { const dt = new Date(START); dt.setDate(START.getDate() + i); return `${dt.getFullYear()}/${String(dt.getMonth()+1).padStart(2,"0")}/${String(dt.getDate()).padStart(2,"0")}`; });
+const dayOf = d => DATES.indexOf(String(d || "").replace(/-/g, "/"));
+const LKEY = "jeju-ledger-cache", QKEY = "jeju-ledger-queue";
+let LED = {entries: [], members: [], at: 0};
+try { LED = Object.assign(LED, JSON.parse(localStorage.getItem(LKEY)) || {}); } catch(e) {}
+let QUEUE = [];
+try { QUEUE = JSON.parse(localStorage.getItem(QKEY)) || []; } catch(e) {}
+const saveQ = () => { try { localStorage.setItem(QKEY, JSON.stringify(QUEUE)); } catch(e) {} };
+const saveL = () => { try { localStorage.setItem(LKEY, JSON.stringify(LED)); } catch(e) {} };
+const cfg = () => ({url: (saved.apiUrl || API_URL || "").trim(), pass: saved.apiPass || "", me: saved.me || ""});
+let syncState = "none", syncing = false;
+const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+function view_(){
+  // 伺服器資料 + 還沒上傳的新增 − 還沒上傳的刪除
+  const del = new Set(QUEUE.filter(q => q.op === "delete").flatMap(q => q.ids));
+  const ids = new Set(LED.entries.map(e => e.id));
+  const pend = QUEUE.filter(q => q.op === "add").flatMap(q => q.entries).filter(e => !ids.has(e.id)).map(e => ({...e, pending: true}));
+  return LED.entries.concat(pend).filter(e => !del.has(e.id));
+}
+function members_(){
+  const q = [...QUEUE].reverse().find(x => x.op === "setMembers");
+  return q ? q.members : LED.members;
+}
+async function call_(body){
+  const c = cfg();
+  const r = await fetch(c.url, {method: "POST", body: JSON.stringify({...body, pass: c.pass})});
+  return r.json();
+}
+async function sync(){
+  const c = cfg();
+  if (!c.url || !c.pass) { syncState = "none"; renderMoney(); return; }
+  if (syncing) return; syncing = true; syncState = "busy"; renderSync();
+  try {
+    let res = null;
+    while (QUEUE.length) {
+      res = await call_(QUEUE[0]);
+      if (!res.ok) throw new Error(res.error || "error");
+      QUEUE.shift(); saveQ();
+    }
+    if (!res) res = await call_({op: "list"});
+    if (!res.ok) throw new Error(res.error || "error");
+    LED = {entries: res.entries || [], members: res.members || [], at: Date.now()}; saveL();
+    syncState = "ok";
+  } catch(err) {
+    syncState = /密碼/.test(err.message) ? "pass" : "off";
+  }
+  syncing = false; renderMoney();
+}
+function push(op){ QUEUE.push(op); saveQ(); renderMoney(); sync(); }
+function delEntry(id){
+  const e = view_().find(x => x.id === id); if (!e) return;
+  if (!confirm(`確定要刪除「${e.item || "這筆"}」嗎？大家的帳本都會一起刪除。`)) return;
+  const qi = QUEUE.findIndex(q => q.op === "add" && q.entries.some(x => x.id === id));
+  if (qi >= 0) { QUEUE[qi].entries = QUEUE[qi].entries.filter(x => x.id !== id); if (!QUEUE[qi].entries.length) QUEUE.splice(qi, 1); saveQ(); renderMoney(); return; }
+  push({op: "delete", ids: [id]});
+}
+
+// ---- 計算 ----
 const DAYN = days.map((d, i) => { const dt = new Date(START); dt.setDate(START.getDate() + i); return `${dt.getMonth()+1}/${dt.getDate()}`; });
 function planRange(c){
   if (!c) return null;
@@ -793,112 +901,241 @@ function planRange(c){
   const n = (t.match(/\d+/g) || []).map(Number); return n.length ? [n[0], n[n.length - 1]] : null;
 }
 const PLAN = days.map(d => d.stops.reduce((a, s) => { const r = planRange(s.cost); return r ? [a[0] + r[0], a[1] + r[1]] : a; }, [0, 0]));
-if (!Array.isArray(saved.extra)) saved.extra = [];
-if (!Array.isArray(saved.fx)) saved.fx = [];
-let xPay = "cash", xCur = "KRW";
-function allEntries(){
-  const out = [];
-  Object.keys(saved).forEach(k => {
-    const m = /^exp:(\d+)\|(.+)\|(cash|card)$/.exec(k); const a = num(saved[k]);
-    if (m && a) out.push({d: +m[1], t: m[2], a, m: m[3], c: m[3] === "card" && saved[`expcur:${m[1]}|${m[2]}`] === "TWD" ? "TWD" : "KRW", src: "stop"});
-  });
-  saved.extra.forEach((x, j) => out.push({d: x.d, t: x.t || "其他", a: +x.a, m: x.m, c: x.c || "KRW", src: "extra", j}));
-  SHOP.forEach((x, i) => { if (getv(i, "done", x.done)) { const st = subtotal(i); if (st) out.push({d: -1, t: `購物：${x.n}`, a: st, m: getv(i, "pay", "") || "none", c: "KRW", src: "shop"}); } });
-  return out;
-}
 const fmt = n => n ? Math.round(n).toLocaleString() : "–";
-function fxAvg(){ const t = saved.fx.reduce((a, x) => a + +x.t, 0), k = saved.fx.reduce((a, x) => a + +x.k, 0); return t ? k / t : null; }
-function curRate(){ return num(saved.rate) || fxAvg(); }
-function updateMoney(){
-  const E = allEntries(), sum = f => E.filter(f).reduce((a, e) => a + e.a, 0);
-  const K = e => e.c === "KRW", T = e => e.c === "TWD";
-  const krw = sum(K), twd = sum(T), r = curRate();
+const money = (a, c) => c === "TWD" ? `NT$ ${Math.round(a).toLocaleString()}` : `₩${Math.round(a).toLocaleString()}`;
+function fxAvg(E){ const f = E.filter(e => e.type === "fx"), t = f.reduce((a, x) => a + x.amount, 0), k = f.reduce((a, x) => a + x.krw, 0); return t ? k / t : null; }
+function settleOf(E, cur){
+  const ms = members_(), bal = {};
+  const add = (m, v) => { bal[m] = (bal[m] || 0) + v; };
+  ms.forEach(m => bal[m] = 0);
+  const paid = {}, share = {};
+  E.filter(e => e.type !== "fx" && e.cur === cur).forEach(e => {
+    const sp = e.split && e.split.length ? e.split : ms; if (!sp.length) return;
+    paid[e.payer] = (paid[e.payer] || 0) + e.amount; add(e.payer, e.amount);
+    sp.forEach(m => { share[m] = (share[m] || 0) + e.amount / sp.length; add(m, -e.amount / sp.length); });
+  });
+  const cr = Object.entries(bal).filter(([, v]) => v > 0.5).sort((a, b) => b[1] - a[1]).map(x => [...x]);
+  const dr = Object.entries(bal).filter(([, v]) => v < -0.5).sort((a, b) => a[1] - b[1]).map(x => [...x]);
+  const tr = []; let i = 0, j = 0;
+  while (i < dr.length && j < cr.length) {
+    const v = Math.min(-dr[i][1], cr[j][1]); tr.push([dr[i][0], cr[j][0], v]);
+    dr[i][1] += v; cr[j][1] -= v; if (dr[i][1] > -0.5) i++; if (cr[j][1] < 0.5) j++;
+  }
+  return {bal, paid, share, tr};
+}
+
+// ---- 畫面 ----
+function renderSync(){
+  const el = document.getElementById("sync"), t = document.getElementById("syncTxt"), n = QUEUE.length;
+  el.className = "sync " + ({ok: "ok", busy: "wait", off: "wait", pass: "err", none: "err"}[syncState] || "");
+  const at = LED.at ? new Date(LED.at).toTimeString().slice(0, 5) : "";
+  t.textContent = syncState === "busy" ? "同步中…" :
+    syncState === "ok" ? `已同步${at ? `・${at} 更新` : ""}` :
+    syncState === "off" ? `離線中${n ? `，${n} 筆等待上傳` : ""}，有網路會自動補上` :
+    syncState === "pass" ? "通關密碼錯誤，請到「設定」修改" : "尚未連線：請按「設定」填入網址和通關密碼";
+}
+function memberOpts(sel, val){
+  const ms = members_();
+  sel.innerHTML = ms.length ? ms.map(m => `<option ${m === val ? "selected" : ""}>${esc(m)}</option>`).join("") : `<option value="">（請先新增成員）</option>`;
+}
+function renderMoney(){
+  renderSync();
+  const E = view_(), X = E.filter(e => e.type !== "fx"), K = e => e.cur !== "TWD", T = e => e.cur === "TWD";
+  const sum = f => X.filter(f).reduce((a, e) => a + e.amount, 0);
+  const krw = sum(K), twd = sum(T), avg = fxAvg(E), r = num(saved.rate) || avg;
   document.getElementById("mTotal").textContent = r ? `NT$ ${fmt(krw / r + twd)}` : (krw || twd ? "請填匯率" : "NT$ 0");
   document.getElementById("mTotalSub").textContent = `韓元 ${fmt(krw)}${twd ? `　＋　台幣 ${fmt(twd)}` : ""}`;
-  document.getElementById("mCash").textContent = fmt(sum(e => K(e) && e.m === "cash"));
-  document.getElementById("mCard").textContent = fmt(sum(e => K(e) && e.m === "card"));
-  const ct = sum(e => T(e) && e.m === "card");
-  document.getElementById("mCardTwd").textContent = ct ? `韓元，另有台幣 ${fmt(ct)}` : "韓元";
-  document.getElementById("mNone").textContent = fmt(sum(e => K(e) && e.m === "none"));
-  const avg = fxAvg();
+  document.getElementById("mCash").textContent = fmt(sum(e => K(e) && e.method === "cash"));
+  document.getElementById("mCard").textContent = fmt(sum(e => K(e) && e.method === "card"));
+  const ct = sum(e => T(e)); document.getElementById("mCardTwd").textContent = ct ? `韓元，另有台幣 ${fmt(ct)}` : "韓元";
+  document.getElementById("mCount").textContent = X.length;
   document.getElementById("mRateHint").textContent = num(saved.rate) ? "使用你輸入的匯率" : avg ? `沒填就用換匯紀錄的平均匯率 ${avg.toFixed(2)}` : "填入後，台幣和韓元會換算成一個總金額";
+  // 每日
   const twdNote = f => { const v = sum(e => T(e) && f(e)); return v ? `<small>＋台幣 ${fmt(v)}</small>` : ""; };
   const rows = days.map((d, i) => {
-    const c = sum(e => K(e) && e.d === i && e.m === "cash"), k = sum(e => K(e) && e.d === i && e.m === "card"), p = PLAN[i];
+    const on = e => dayOf(e.date) === i;
+    const c = sum(e => K(e) && on(e) && e.method === "cash"), k = sum(e => K(e) && on(e) && e.method === "card"), p = PLAN[i];
     const pt = p[1] ? `<small class="${c + k > p[1] ? "over" : ""}">預估 ${p[0] === p[1] ? fmt(p[0]) : fmt(p[0]) + "～" + fmt(p[1])}</small>` : "";
-    return `<tr><td>${DAYN[i]}</td><td>${fmt(c)}</td><td>${fmt(k)}${twdNote(e => e.d === i && e.m === "card")}</td><td>${fmt(c + k)}${twdNote(e => e.d === i)}${pt}</td></tr>`;
+    return `<tr><td>${DAYN[i]}</td><td>${fmt(c)}</td><td>${fmt(k)}</td><td>${fmt(c + k)}${twdNote(on)}${pt}</td></tr>`;
   });
-  const sc = sum(e => e.d === -1 && e.m === "cash"), sd = sum(e => e.d === -1 && e.m === "card"), sn = sum(e => e.d === -1 && e.m === "none");
-  if (sc + sd + sn) rows.push(`<tr><td>購物清單</td><td>${fmt(sc)}</td><td>${fmt(sd)}</td><td>${fmt(sc + sd + sn)}${sn ? `<small>${fmt(sn)} 未標示</small>` : ""}</td></tr>`);
-  rows.push(`<tr class="tot"><td>合計</td><td>${fmt(sum(e => K(e) && e.m === "cash"))}</td><td>${fmt(sum(e => K(e) && e.m === "card"))}${twdNote(e => e.m === "card")}</td><td>${fmt(krw)}${twdNote(() => true)}</td></tr>`);
+  rows.push(`<tr class="tot"><td>合計</td><td>${fmt(sum(e => K(e) && e.method === "cash"))}</td><td>${fmt(sum(e => K(e) && e.method === "card"))}</td><td>${fmt(krw)}${twdNote(() => true)}</td></tr>`);
   document.getElementById("mDays").innerHTML = rows.join("");
-  const tag = (m, c) => (m === "cash" ? `<span class="mtag cash">現金</span>` : m === "card" ? `<span class="mtag card">刷卡</span>` : `<span class="mtag">未標示</span>`) + (c === "TWD" ? `<span class="mtag twd">台幣</span>` : "");
-  const amt = e => e.c === "TWD" ? `NT$ ${(+e.a).toLocaleString()}` : `₩${(+e.a).toLocaleString()}`;
-  document.getElementById("xList").innerHTML = saved.extra.map((x, j) =>
-    `<li><span>${esc(x.t || "其他")}<br><small>${DAYN[x.d] || ""}</small></span>${tag(x.m, x.c)}<span>${amt({a: x.a, c: x.c})}</span><button class="del" data-del="${j}" aria-label="刪除這筆">×</button></li>`).join("");
-  document.getElementById("mDetail").innerHTML = E.length ? [...E].sort((a, b) => a.d - b.d).map(e =>
-    `<li><span>${esc(e.t)}<br><small>${e.d >= 0 ? DAYN[e.d] : "購物清單"}</small></span>${tag(e.m, e.c)}<span>${amt(e)}</span></li>`).join("") : `<li><span>還沒有任何花費紀錄。</span></li>`;
+  // 分帳
+  const ms = members_();
+  let st = "";
+  if (!ms.length) st = `<p style="margin:0;font-size:.88rem;color:var(--ink-soft)">先到「設定」新增一起記帳的成員，就會自動算出誰要給誰多少錢。</p>`;
+  else ["KRW", "TWD"].forEach(cur => {
+    if (!X.some(e => e.cur === cur)) return;
+    const S = settleOf(E, cur), names = [...new Set([...ms, ...Object.keys(S.bal)])];
+    st += `<div style="font-size:.8rem;color:var(--ink-soft);margin-top:6px">${cur === "TWD" ? "台幣" : "韓元"}</div>
+      <table class="mtable"><thead><tr><th>成員</th><th>付出</th><th>應分攤</th><th>差額</th></tr></thead><tbody>${names.map(m => {
+        const b = S.bal[m] || 0;
+        return `<tr><td>${esc(m)}</td><td>${fmt(S.paid[m])}</td><td>${fmt(S.share[m])}</td><td class="${b > 0.5 ? "pos" : b < -0.5 ? "neg" : ""}">${b > 0.5 ? "+" : ""}${Math.abs(b) < 0.5 ? "0" : Math.round(b).toLocaleString()}</td></tr>`;
+      }).join("")}</tbody></table>
+      <ul class="xfer">${S.tr.length ? S.tr.map(([a, b, v]) => `<li>${esc(a)} → ${esc(b)}　<b style="font-weight:normal">${money(v, cur)}</b></li>`).join("") : `<li>目前不用互相找錢 🎉</li>`}</ul>`;
+  });
+  document.getElementById("settle").innerHTML = st || `<p style="margin:0;font-size:.88rem;color:var(--ink-soft)">還沒有花費紀錄。</p>`;
+  // 換匯
+  const F = E.filter(e => e.type === "fx");
+  document.getElementById("fList").innerHTML = F.map(x =>
+    `<li><span>${esc(x.payer || "")}${x.stop ? `・${esc(x.stop)}` : ""}<br><small>1 台幣 ≈ ${(x.krw / x.amount).toFixed(2)} 韓元${x.pending ? `　<span class="pend">待上傳</span>` : ""}</small></span><span>NT$ ${x.amount.toLocaleString()} → ₩${x.krw.toLocaleString()}</span><button class="del" data-edel="${x.id}" aria-label="刪除">×</button></li>`).join("");
+  const gotK = F.reduce((a, x) => a + x.krw, 0), cashK = sum(e => K(e) && e.method === "cash");
+  document.getElementById("fInfo").innerHTML = F.length ? `
+    <div class="sum-box"><small>總共換到</small><b>${fmt(gotK)}</b><span class="two">韓元（平均 ${avg.toFixed(2)}）</span></div>
+    <div class="sum-box paid"><small>大家的現金大約還剩</small><b>${fmt(gotK - cashK)}</b><span class="two">韓元</span></div>` : "";
+  { const fw = document.getElementById("fWho"); memberOpts(fw, fw.dataset.touched ? fw.value : cfg().me); }
+  // 明細
+  const tag = e => (e.method === "cash" ? `<span class="mtag cash">現金</span>` : e.method === "card" ? `<span class="mtag card">刷卡</span>` : "") + (e.cur === "TWD" ? `<span class="mtag twd">台幣</span>` : "");
+  document.getElementById("mDetail").innerHTML = X.length ? [...X].sort((a, b) => (a.date > b.date) - (a.date < b.date)).map(e =>
+    `<li><span>${esc(e.item || e.stop || "花費")}<br><small>${DAYN[dayOf(e.date)] || e.date}・${esc(e.payer)} 付${e.split && e.split.length && e.split.length < ms.length ? `・${e.split.map(esc).join("、")} 分` : ""}${e.pending ? `　<span class="pend">待上傳</span>` : ""}</small></span>${tag(e)}<span>${money(e.amount, e.cur)}</span><button class="del" data-edel="${e.id}" aria-label="刪除">×</button></li>`).join("")
+    : `<li><span>還沒有任何花費紀錄。</span></li>`;
+  // 行程卡片上的紀錄
+  document.querySelectorAll("[data-paylist]").forEach(el => {
+    const [d, ...n] = el.dataset.paylist.split("|"), name = n.join("|");
+    const L = X.filter(e => dayOf(e.date) === +d && e.stop === name);
+    el.innerHTML = L.map(e => `<li><span class="w">${esc(e.payer)} 付・${e.method === "card" ? "刷卡" : "現金"}${e.pending ? ` <span class="pend">待上傳</span>` : ""}</span><span>${money(e.amount, e.cur)}</span><button class="del" data-pdel="${e.id}" aria-label="刪除">×</button></li>`).join("");
+  });
   document.querySelectorAll("[data-spent]").forEach(el => {
-    const [d, ...n] = el.dataset.spent.split("|"); const name = n.join("|");
-    const at = E.filter(e => e.src === "stop" && e.d === +d && e.t === name);
-    const kv = at.filter(K).reduce((a, e) => a + e.a, 0), tv = at.filter(T).reduce((a, e) => a + e.a, 0);
+    const [d, ...n] = el.dataset.spent.split("|"), name = n.join("|");
+    const L = X.filter(e => dayOf(e.date) === +d && e.stop === name);
+    const kv = L.filter(K).reduce((a, e) => a + e.amount, 0), tv = L.filter(T).reduce((a, e) => a + e.amount, 0);
     el.textContent = [kv && `₩${kv.toLocaleString()}`, tv && `NT$${tv.toLocaleString()}`].filter(Boolean).join(" ＋ ");
   });
-  // 換匯
-  document.getElementById("fList").innerHTML = saved.fx.map((x, j) =>
-    `<li><span>${esc(x.w || "換匯")}<br><small>1 台幣 ≈ ${(x.k / x.t).toFixed(2)} 韓元</small></span><span>NT$ ${(+x.t).toLocaleString()} → ₩${(+x.k).toLocaleString()}</span><button class="del" data-fdel="${j}" aria-label="刪除這筆換匯">×</button></li>`).join("");
-  const gotK = saved.fx.reduce((a, x) => a + +x.k, 0), cashK = sum(e => K(e) && e.m === "cash");
-  document.getElementById("fInfo").innerHTML = saved.fx.length ? `
-    <div class="sum-box"><small>總共換到</small><b>${fmt(gotK)}</b><span class="two">韓元（平均 ${avg.toFixed(2)}）</span></div>
-    <div class="sum-box paid"><small>現金大約還剩</small><b>${fmt(gotK - cashK)}</b><span class="two">韓元</span></div>` : "";
+  // 舊紀錄搬家
+  const old = oldLocal();
+  document.getElementById("migr").classList.toggle("on", old.length > 0 && !saved.migrated);
+  document.getElementById("migrTxt").textContent = `這支手機有 ${old.length} 筆之前記在本機的花費／換匯，要上傳到共同帳本嗎？上傳後付款人會記成「${cfg().me || "（請先在設定選我是誰）"}」。`;
+}
+const updateMoney = renderMoney;
+
+// ---- 舊的本機紀錄 ----
+function oldLocal(){
+  const out = [], me = cfg().me;
+  Object.keys(saved).forEach(k => {
+    const m = /^exp:(\d+)\|(.+)\|(cash|card)$/.exec(k); const a = num(saved[k]);
+    if (m && a) out.push({type: "exp", date: DATES[+m[1]], stop: m[2], item: m[2], amount: a, method: m[3], cur: m[3] === "card" && saved[`expcur:${m[1]}|${m[2]}`] === "TWD" ? "TWD" : "KRW"});
+  });
+  (saved.extra || []).forEach(x => out.push({type: "exp", date: DATES[x.d], stop: "", item: x.t || "其他", amount: +x.a, method: x.m, cur: x.c || "KRW"}));
+  (saved.fx || []).forEach(x => out.push({type: "fx", date: "", stop: x.w || "", item: "換匯", amount: +x.t, krw: +x.k, method: "", cur: "TWD"}));
+  return out.map(e => ({...e, payer: me, by: me, split: []}));
+}
+
+// ---- 記一筆（下方彈出） ----
+let eCur = "KRW", eMethod = "cash", eSplit = [], eStop = "";
+function seg(id, val){ document.querySelectorAll(`#${id} button`).forEach(b => b.classList.toggle("on", b.dataset.v === val)); }
+function openSheet(o = {}){
+  const ms = members_(), c = cfg();
+  const nw = nowInfo();
+  document.getElementById("eDay").innerHTML = DAYN.map((d, i) => `<option value="${i}">${d}（Day ${i + 1}）</option>`).join("");
+  document.getElementById("eDay").value = o.day ?? (nw ? nw.day : 0);
+  document.getElementById("eItem").value = o.item || "";
+  document.getElementById("eAmt").value = o.amount || "";
+  eStop = o.stop || ""; eCur = "KRW"; eMethod = "cash"; eSplit = [...ms];
+  seg("eCur", eCur); seg("eMethod", eMethod);
+  memberOpts(document.getElementById("ePayer"), c.me);
+  renderSplit();
+  document.getElementById("eWarn").textContent = ms.length ? "" : "還沒有成員：請先到「共同記帳」的「設定」新增成員。";
+  document.getElementById("shTitle").textContent = eStop ? `記一筆：${eStop}` : "記一筆花費";
+  document.getElementById("sheetBg").classList.add("on"); document.getElementById("sheet").classList.add("on");
+  setTimeout(() => document.getElementById("eAmt").focus(), 250);
+}
+function closeSheet(){ document.getElementById("sheetBg").classList.remove("on"); document.getElementById("sheet").classList.remove("on"); }
+function renderSplit(){
+  document.getElementById("eSplit").innerHTML = members_().map(m => `<button class="chip2 ${eSplit.includes(m) ? "on" : ""}" data-sp="${esc(m)}">${esc(m)}</button>`).join("");
 }
 (() => {
-  const sel = document.getElementById("xDay"), nw = nowInfo();
-  sel.innerHTML = DAYN.map((d, i) => `<option value="${i}">${d}（Day ${i + 1}）</option>`).join("");
-  sel.value = nw ? nw.day : 0;
-  const segPick = (id, attr, set) => document.getElementById(id).addEventListener("click", e => {
-    const b = e.target.closest(`[${attr}]`); if (!b) return; set(b.getAttribute(attr));
-    document.querySelectorAll(`#${id} button`).forEach(x => x.classList.toggle("on", x === b));
+  document.getElementById("sheetBg").addEventListener("click", closeSheet);
+  document.getElementById("shClose").addEventListener("click", closeSheet);
+  document.getElementById("eCur").addEventListener("click", e => { const b = e.target.closest("[data-v]"); if (b) { eCur = b.dataset.v; seg("eCur", eCur); } });
+  document.getElementById("eMethod").addEventListener("click", e => { const b = e.target.closest("[data-v]"); if (b) { eMethod = b.dataset.v; seg("eMethod", eMethod); } });
+  document.getElementById("eSplit").addEventListener("click", e => {
+    const b = e.target.closest("[data-sp]"); if (!b) return; const m = b.dataset.sp;
+    eSplit = eSplit.includes(m) ? eSplit.filter(x => x !== m) : [...eSplit, m]; renderSplit();
   });
-  segPick("xPay", "data-m", v => xPay = v);
-  segPick("xCur", "data-c", v => xCur = v);
-  document.getElementById("xAdd").addEventListener("click", () => {
-    const a = num(document.getElementById("xAmt").value); if (!a) { document.getElementById("xAmt").focus(); return; }
-    saved.extra.push({d: +sel.value, t: document.getElementById("xName").value.trim(), a, m: xPay, c: xCur});
-    persist(); document.getElementById("xAmt").value = ""; document.getElementById("xName").value = ""; updateMoney();
+  document.getElementById("eSave").addEventListener("click", () => {
+    const a = num(document.getElementById("eAmt").value), payer = document.getElementById("ePayer").value, w = document.getElementById("eWarn");
+    if (!members_().length) { w.textContent = "請先到「設定」新增成員。"; return; }
+    if (!a) { w.textContent = "請輸入金額。"; document.getElementById("eAmt").focus(); return; }
+    if (!eSplit.length) { w.textContent = "至少要選一個分攤的人。"; return; }
+    const all = eSplit.length === members_().length;
+    push({op: "add", entries: [{id: newId(), by: cfg().me || payer, type: "exp", date: DATES[+document.getElementById("eDay").value],
+      stop: eStop, item: document.getElementById("eItem").value.trim() || eStop || "花費", amount: a, cur: eCur, method: eMethod, payer, split: all ? [] : eSplit}]});
+    closeSheet();
   });
-  document.getElementById("xList").addEventListener("click", e => {
-    const b = e.target.closest("[data-del]"); if (!b) return;
-    if (!confirm("確定要刪除這一筆嗎？")) return;
-    saved.extra.splice(+b.dataset.del, 1); persist(); updateMoney();
+  document.getElementById("addExp").addEventListener("click", () => openSheet({}));
+  // 設定
+  const card = document.getElementById("setCard");
+  let memDraft = null;
+  const drawMem = () => {
+    const ms = memDraft || members_();
+    document.getElementById("memChips").innerHTML = ms.length ? ms.map(m => `<button class="chip2" data-mdel="${esc(m)}">${esc(m)}<span class="x">×</span></button>`).join("") : `<span style="font-size:.82rem;color:var(--ink-soft)">還沒有成員</span>`;
+    const sel = document.getElementById("cfgMe"), cur = sel.value || cfg().me;
+    sel.innerHTML = `<option value="">（選擇）</option>` + ms.map(m => `<option ${m === cur ? "selected" : ""}>${esc(m)}</option>`).join("");
+  };
+  document.getElementById("setBtn").addEventListener("click", () => {
+    card.classList.toggle("on");
+    if (card.classList.contains("on")) { memDraft = [...members_()]; document.getElementById("cfgUrl").value = cfg().url; document.getElementById("cfgPass").value = cfg().pass; drawMem(); }
   });
+  document.getElementById("memAdd").addEventListener("click", () => {
+    const v = document.getElementById("memNew").value.trim(); if (!v) return;
+    if (!memDraft.includes(v)) memDraft.push(v); document.getElementById("memNew").value = ""; drawMem();
+  });
+  document.getElementById("memChips").addEventListener("click", e => {
+    const b = e.target.closest("[data-mdel]"); if (!b) return;
+    if (!confirm(`要把「${b.dataset.mdel}」從成員移除嗎？（已記的帳不會刪掉）`)) return;
+    memDraft = memDraft.filter(m => m !== b.dataset.mdel); drawMem();
+  });
+  document.getElementById("cfgSave").addEventListener("click", () => {
+    saved.apiUrl = document.getElementById("cfgUrl").value.trim();
+    saved.apiPass = document.getElementById("cfgPass").value;
+    saved.me = document.getElementById("cfgMe").value;
+    persist();
+    const before = JSON.stringify(members_());
+    if (memDraft && JSON.stringify(memDraft) !== before) QUEUE.push({op: "setMembers", members: memDraft}), saveQ();
+    card.classList.remove("on"); renderMoney(); sync();
+  });
+  document.getElementById("syncNow").addEventListener("click", sync);
+  // 換匯
+  document.getElementById("fWho").addEventListener("change", e => e.target.dataset.touched = "1");
   document.getElementById("fAdd").addEventListener("click", () => {
     const t = num(document.getElementById("fTwd").value), k = num(document.getElementById("fKrw").value);
     if (!t) { document.getElementById("fTwd").focus(); return; } if (!k) { document.getElementById("fKrw").focus(); return; }
-    saved.fx.push({t, k, w: document.getElementById("fWhere").value.trim()}); persist();
-    ["fTwd","fKrw","fWhere"].forEach(id => document.getElementById(id).value = ""); updateMoney();
+    const who = document.getElementById("fWho").value || cfg().me;
+    push({op: "add", entries: [{id: newId(), by: cfg().me || who, type: "fx", date: "", stop: document.getElementById("fWhere").value.trim(), item: "換匯", amount: t, krw: k, cur: "TWD", method: "", payer: who, split: []}]});
+    ["fTwd","fKrw","fWhere"].forEach(id => document.getElementById(id).value = "");
   });
-  document.getElementById("fList").addEventListener("click", e => {
-    const b = e.target.closest("[data-fdel]"); if (!b) return;
-    if (!confirm("確定要刪除這筆換匯紀錄嗎？")) return;
-    saved.fx.splice(+b.dataset.fdel, 1); persist(); updateMoney();
-  });
+  // 刪除（明細、換匯）
+  document.getElementById("money").addEventListener("click", e => { const b = e.target.closest("[data-edel]"); if (b) delEntry(b.dataset.edel); });
+  // 匯率
   const rate = document.getElementById("mRate"); rate.value = saved.rate || "";
-  rate.addEventListener("input", () => { saved.rate = rate.value.replace(/[^\d.]/g, ""); persist(); updateMoney(); });
+  rate.addEventListener("input", () => { saved.rate = rate.value.replace(/[^\d.]/g, ""); persist(); renderMoney(); });
+  // 舊紀錄上傳
+  document.getElementById("migrGo").addEventListener("click", () => {
+    if (!cfg().me) { alert("請先到「設定」選擇「我是誰」。"); document.getElementById("setBtn").click(); return; }
+    const L = oldLocal().map(e => ({...e, id: newId()}));
+    saved.migrated = true; persist(); push({op: "add", entries: L});
+  });
+  // 匯出
   document.getElementById("mCsv").addEventListener("click", () => {
-    const E = allEntries().sort((a, b) => a.d - b.d), r = curRate();
-    const q = v => `"${String(v).replace(/"/g, '""')}"`;
-    const lines = [["日期","項目","付款方式","幣別","金額","換算台幣"].map(q).join(",")].concat(
-      E.map(e => [e.d >= 0 ? `2026/${DAYN[e.d]}` : "購物清單", e.t, e.m === "cash" ? "現金" : e.m === "card" ? "刷卡" : "未標示",
-        e.c === "TWD" ? "台幣" : "韓元", e.a, e.c === "TWD" ? e.a : (r ? Math.round(e.a / r) : "")].map(q).join(",")),
-      saved.fx.map(x => ["換匯", x.w || "換匯", "", "台幣→韓元", `${x.t}→${x.k}`, ""].map(q).join(",")));
+    const E = view_(), ms = members_(), r = num(saved.rate) || fxAvg(E);
+    const q = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    const lines = [["日期","項目","行程","付款人","分攤","付款方式","幣別","金額","換算台幣"].map(q).join(",")]
+      .concat(E.filter(e => e.type !== "fx").sort((a, b) => (a.date > b.date) - (a.date < b.date)).map(e => [e.date, e.item, e.stop, e.payer, (e.split && e.split.length ? e.split : ms).join("、"),
+        e.method === "card" ? "刷卡" : "現金", e.cur === "TWD" ? "台幣" : "韓元", e.amount, e.cur === "TWD" ? e.amount : (r ? Math.round(e.amount / r) : "")].map(q).join(",")))
+      .concat(E.filter(e => e.type === "fx").map(e => ["換匯", e.stop, "", e.payer, "", "", "台幣→韓元", `${e.amount}→${e.krw}`, ""].map(q).join(",")))
+      .concat(["", q("分帳結算")]).concat(["KRW", "TWD"].flatMap(c => settleOf(E, c).tr.map(([a, b, v]) => [a + " → " + b, money(v, c)].map(q).join(","))));
     const blob = new Blob(["\ufeff" + lines.join("\r\n")], {type: "text/csv"});
-    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "濟州島花費紀錄.csv";
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "濟州島共同記帳.csv";
     document.body.appendChild(a); a.click(); a.remove();
   });
+  if (!cfg().url || !cfg().pass) card.classList.add("on"), (memDraft = [...members_()]), document.getElementById("cfgUrl").value = cfg().url, drawMem();
+  window.addEventListener("online", sync);
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") sync(); });
+  setInterval(() => { if (document.visibilityState === "visible") sync(); }, 60000);
 })();
 window.__moneyReady = true;
-updateMoney();
+renderMoney();
+sync();
 
 // 選單高亮
 const tabs = [...document.querySelectorAll(".tabs a")];
