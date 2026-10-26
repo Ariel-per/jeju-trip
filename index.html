@@ -266,7 +266,8 @@ details.detail summary{cursor:pointer;color:var(--ink-soft);font-size:.85rem;mar
 .sheet-bg{position:fixed;inset:0;background:rgba(62,58,57,.55);z-index:40;display:none}
 .sheet-bg.on{display:block}
 .sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;background:var(--paper);border-top:var(--line);border-radius:24px 24px 0 0;padding:16px 18px calc(18px + env(safe-area-inset-bottom,0px));max-height:88vh;overflow:auto;transform:translateY(105%);transition:transform .25s}
-.sheet.on{transform:none}
+.sheet{visibility:hidden;transition:transform .25s,visibility 0s .25s}
+.sheet.on{transform:none;visibility:visible;transition:transform .25s}
 .sheet-in{max-width:480px;margin:0 auto}
 .sheet h3{font-weight:normal;margin:0 0 10px;font-size:1.15rem;display:flex;justify-content:space-between;align-items:center}
 .mform{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -274,6 +275,11 @@ details.detail summary{cursor:pointer;color:var(--ink-soft);font-size:.85rem;mar
 .mform .full{grid-column:1/-1}
 .migr{display:none;background:#FBEFD0;margin-bottom:14px}
 .migr.on{display:block}
+.dgrp + .dgrp{margin-top:12px}
+.dhead{display:flex;justify-content:space-between;align-items:baseline;border-bottom:3px solid var(--ink);padding-bottom:2px}
+.dhead small{color:var(--ink-soft)}
+.dgrp .elist{margin-top:0}
+.dgrp .elist li:first-child{border-top:0}
 /* prep */
 .check{list-style:none;margin:0;padding:0}
 .check li+li{margin-top:10px}
@@ -512,6 +518,7 @@ details.detail summary{cursor:pointer;color:var(--ink-soft);font-size:.85rem;mar
       <table class="mtable"><thead><tr><th>日期</th><th>現金</th><th>刷卡</th><th>合計</th></tr></thead><tbody id="mDays"></tbody></table>
       <p style="margin:8px 0 0;font-size:.75rem;color:var(--ink-soft)">表格金額為韓元；台幣付款的部分另外標示在小字。</p>
     </div>
+    <details class="detail" open><summary id="mDetailSum">每一筆明細</summary><div class="card" style="margin-top:8px"><div id="mDetail"></div></div></details>
 
     <div class="card" style="margin-top:14px">
       <div style="margin-bottom:8px">換匯紀錄</div>
@@ -526,7 +533,6 @@ details.detail summary{cursor:pointer;color:var(--ink-soft);font-size:.85rem;mar
       <div class="fx-info" id="fInfo"></div>
     </div>
 
-    <details class="detail"><summary>查看每一筆明細</summary><div class="card" style="margin-top:8px"><ul class="elist" id="mDetail"></ul></div></details>
     <p style="text-align:center;margin-top:16px"><button class="btn plain" id="mCsv">匯出 Excel（CSV）</button></p>
   </section>
 
@@ -835,7 +841,14 @@ renderShop();
 // ===== 共同記帳 =====
 const API_URL = "https://script.google.com/macros/s/AKfycbzkbxTSmuPc6L4PodV_05SScq8B5xuQ261sgjGfdfGqJeQDQoZIvsO5J1K911pc8-wT/exec";   // 部署 Apps Script 後填入網址，朋友就只需要輸入通關密碼
 const DATES = days.map((d, i) => { const dt = new Date(START); dt.setDate(START.getDate() + i); return `${dt.getFullYear()}/${String(dt.getMonth()+1).padStart(2,"0")}/${String(dt.getDate()).padStart(2,"0")}`; });
-const dayOf = d => DATES.indexOf(String(d || "").replace(/-/g, "/"));
+function dayOf(d){
+  let t = String(d ?? "").trim(); if (!t) return -1;
+  if (/T\d{2}:/.test(t)) { const x = new Date(t); if (!isNaN(x)) t = `${x.getFullYear()}/${x.getMonth() + 1}/${x.getDate()}`; }
+  let m = /(\d{4})\s*[\/\-.年]\s*(\d{1,2})\s*[\/\-.月]\s*(\d{1,2})/.exec(t) || /(?:^|\D)(\d{1,2})\s*[\/\-.月]\s*(\d{1,2})(?!\d)/.exec(t);
+  if (!m) return -1;
+  const mo = +(m.length === 4 ? m[2] : m[1]), da = +(m.length === 4 ? m[3] : m[2]);
+  return DATES.findIndex(x => { const [, M, D] = x.split("/"); return +M === mo && +D === da; });
+}
 const LKEY = "jeju-ledger-cache", QKEY = "jeju-ledger-queue";
 let LED = {entries: [], members: [], at: 0};
 try { LED = Object.assign(LED, JSON.parse(localStorage.getItem(LKEY)) || {}); } catch(e) {}
@@ -958,6 +971,8 @@ function renderMoney(){
     const pt = p[1] ? `<small class="${c + k > p[1] ? "over" : ""}">預估 ${p[0] === p[1] ? fmt(p[0]) : fmt(p[0]) + "～" + fmt(p[1])}</small>` : "";
     return `<tr><td>${DAYN[i]}</td><td>${fmt(c)}</td><td>${fmt(k)}</td><td>${fmt(c + k)}${twdNote(on)}${pt}</td></tr>`;
   });
+  const un = e => dayOf(e.date) < 0;
+  if (X.some(un)) rows.push(`<tr><td>未分日期</td><td>${fmt(sum(e => K(e) && un(e) && e.method === "cash"))}</td><td>${fmt(sum(e => K(e) && un(e) && e.method === "card"))}</td><td>${fmt(sum(e => K(e) && un(e)))}${twdNote(un)}</td></tr>`);
   rows.push(`<tr class="tot"><td>合計</td><td>${fmt(sum(e => K(e) && e.method === "cash"))}</td><td>${fmt(sum(e => K(e) && e.method === "card"))}</td><td>${fmt(krw)}${twdNote(() => true)}</td></tr>`);
   document.getElementById("mDays").innerHTML = rows.join("");
   // 分帳
@@ -986,9 +1001,14 @@ function renderMoney(){
   { const fw = document.getElementById("fWho"); memberOpts(fw, fw.dataset.touched ? fw.value : cfg().me); }
   // 明細
   const tag = e => (e.method === "cash" ? `<span class="mtag cash">現金</span>` : e.method === "card" ? `<span class="mtag card">刷卡</span>` : "") + (e.cur === "TWD" ? `<span class="mtag twd">台幣</span>` : "");
-  document.getElementById("mDetail").innerHTML = X.length ? [...X].sort((a, b) => (a.date > b.date) - (a.date < b.date)).map(e =>
-    `<li><span>${esc(e.item || e.stop || "花費")}<br><small>${DAYN[dayOf(e.date)] || e.date}・${esc(e.payer)} 付${e.split && e.split.length && e.split.length < ms.length ? `・${e.split.map(esc).join("、")} 分` : ""}${e.pending ? `　<span class="pend">待上傳</span>` : ""}</small></span>${tag(e)}<span>${money(e.amount, e.cur)}</span><button class="del" data-edel="${e.id}" aria-label="刪除">×</button></li>`).join("")
-    : `<li><span>還沒有任何花費紀錄。</span></li>`;
+  document.getElementById("mDetailSum").textContent = `每一筆明細（共 ${X.length} 筆）`;
+  const groups = DATES.map((d, i) => ({label: `${DAYN[i]}（Day ${i + 1}）`, list: X.filter(e => dayOf(e.date) === i)}));
+  groups.push({label: "未分日期", list: X.filter(e => dayOf(e.date) < 0)});
+  document.getElementById("mDetail").innerHTML = X.length ? groups.filter(g => g.list.length).map(g => {
+    const k = g.list.filter(K).reduce((a, e) => a + e.amount, 0), t = g.list.filter(T).reduce((a, e) => a + e.amount, 0);
+    return `<div class="dgrp"><div class="dhead"><span>${g.label}</span><small>${[k && "₩" + fmt(k), t && "NT$ " + fmt(t)].filter(Boolean).join(" ＋ ")}</small></div><ul class="elist">${g.list.map(e =>
+      `<li><span>${esc(e.item || e.stop || "花費")}<br><small>${esc(e.payer)} 付${e.split && e.split.length && e.split.length < ms.length ? `・${e.split.map(esc).join("、")} 分` : ""}${e.by && e.by !== e.payer ? `・${esc(e.by)} 記` : ""}${dayOf(e.date) < 0 ? `・日期：${esc(e.date || "空白")}` : ""}${e.pending ? `　<span class="pend">待上傳</span>` : ""}</small></span>${tag(e)}<span>${money(e.amount, e.cur)}</span><button class="del" data-edel="${e.id}" aria-label="刪除">×</button></li>`).join("")}</ul></div>`;
+  }).join("") : `<p style="margin:0;font-size:.88rem;color:var(--ink-soft)">還沒有任何花費紀錄。</p>`;
   // 行程卡片上的紀錄
   document.querySelectorAll("[data-paylist]").forEach(el => {
     const [d, ...n] = el.dataset.paylist.split("|"), name = n.join("|");
