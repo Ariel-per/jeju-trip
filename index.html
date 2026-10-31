@@ -204,7 +204,16 @@ h2 svg{width:30px;height:30px}
 .seg button{font:inherit;font-size:.78rem;border:0;background:#fff;color:var(--ink);padding:2px 12px;cursor:pointer}
 .seg button+button{border-left:2.5px solid var(--ink)}
 .seg button.on{background:var(--yellow)}
-.money-sum{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px}
+.money-sum{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.cur-box .kv{display:flex;justify-content:space-between;align-items:baseline;font-size:.85rem;padding:2px 0}
+.cur-box .kv b{font-size:1rem}
+.cur-box .kv.tot{border-top:2px dashed #d8d2cf;margin-top:2px;padding-top:4px}
+.cur-box .kv.tot b{font-size:1.15rem}
+.cur-box.twd{background:#FCEDEA}
+.cur-title{display:flex;justify-content:space-between;align-items:baseline;margin:0 0 4px}
+.cur-title small{color:var(--ink-soft);font-size:.75rem}
+.cur-title + .mtable{margin-bottom:6px}
+.mtable + .cur-title{margin-top:16px}
 .money-sum .sum-box b{font-size:1.1rem}
 .money-sum .total{grid-column:1/-1;background:var(--yellow)}
 .money-sum .total b{font-size:1.5rem}
@@ -500,9 +509,8 @@ details.detail summary{cursor:pointer;color:var(--ink-soft);font-size:.85rem;mar
 
     <div class="money-sum">
       <div class="sum-box total"><small>大家總共花了（換算台幣）</small><b id="mTotal">–</b><small class="sub2" id="mTotalSub"></small></div>
-      <div class="sum-box"><small>現金</small><b id="mCash">0</b><span class="two">韓元</span></div>
-      <div class="sum-box"><small>刷卡</small><b id="mCard">0</b><span class="two" id="mCardTwd">韓元</span></div>
-      <div class="sum-box"><small>筆數</small><b id="mCount">0</b><span class="two">筆</span></div>
+      <div class="sum-box cur-box"><small>韓元</small><div class="kv"><span>現金</span><b id="mCash">–</b></div><div class="kv"><span>刷卡</span><b id="mCard">–</b></div><div class="kv tot"><span>合計</span><b id="mKrw">–</b></div></div>
+      <div class="sum-box cur-box twd"><small>台幣</small><div class="kv"><span>現金</span><b id="mTCash">–</b></div><div class="kv"><span>刷卡</span><b id="mTCard">–</b></div><div class="kv tot"><span>合計</span><b id="mTwd">–</b></div></div>
     </div>
 
     <div class="card settle">
@@ -515,8 +523,7 @@ details.detail summary{cursor:pointer;color:var(--ink-soft);font-size:.85rem;mar
     </div>
 
     <div class="card" style="margin-top:14px">
-      <table class="mtable"><thead><tr><th>日期</th><th>現金</th><th>刷卡</th><th>合計</th></tr></thead><tbody id="mDays"></tbody></table>
-      <p style="margin:8px 0 0;font-size:.75rem;color:var(--ink-soft)">表格金額為韓元；台幣付款的部分另外標示在小字。</p>
+      <div id="mDays"></div>
     </div>
     <details class="detail" open><summary id="mDetailSum">每一筆明細</summary><div class="card" style="margin-top:8px"><div id="mDetail"></div></div></details>
 
@@ -966,23 +973,27 @@ function renderMoney(){
   const krw = sum(K), twd = sum(T), avg = fxAvg(E), r = num(saved.rate) || avg;
   document.getElementById("mTotal").textContent = r ? `NT$ ${fmt(krw / r + twd)}` : (krw || twd ? "請填匯率" : "NT$ 0");
   document.getElementById("mTotalSub").textContent = `韓元 ${fmt(krw)}${twd ? `　＋　台幣 ${fmt(twd)}` : ""}`;
-  document.getElementById("mCash").textContent = fmt(sum(e => K(e) && e.method === "cash"));
-  document.getElementById("mCard").textContent = fmt(sum(e => K(e) && e.method === "card"));
-  const ct = sum(e => T(e)); document.getElementById("mCardTwd").textContent = ct ? `韓元，另有台幣 ${fmt(ct)}` : "韓元";
-  document.getElementById("mCount").textContent = X.length;
+  [["mCash", e => K(e) && e.method === "cash"], ["mCard", e => K(e) && e.method === "card"], ["mKrw", K],
+   ["mTCash", e => T(e) && e.method === "cash"], ["mTCard", e => T(e) && e.method === "card"], ["mTwd", T]]
+    .forEach(([id, f]) => document.getElementById(id).textContent = fmt(sum(f)));
   document.getElementById("mRateHint").textContent = num(saved.rate) ? "使用你輸入的匯率" : avg ? `沒填就用換匯紀錄的平均匯率 ${avg.toFixed(2)}` : "填入後，台幣和韓元會換算成一個總金額";
-  // 每日
-  const twdNote = f => { const v = sum(e => T(e) && f(e)); return v ? `<small>＋台幣 ${fmt(v)}</small>` : ""; };
-  const rows = days.map((d, i) => {
-    const on = e => dayOf(e.date) === i;
-    const c = sum(e => K(e) && on(e) && e.method === "cash"), k = sum(e => K(e) && on(e) && e.method === "card"), p = PLAN[i];
-    const pt = p[1] ? `<small class="${c + k > p[1] ? "over" : ""}">預估 ${p[0] === p[1] ? fmt(p[0]) : fmt(p[0]) + "～" + fmt(p[1])}</small>` : "";
-    return `<tr><td>${DAYN[i]}</td><td>${fmt(c)}</td><td>${fmt(k)}</td><td>${fmt(c + k)}${twdNote(on)}${pt}</td></tr>`;
-  });
+  // 每日（韓元、台幣分開）
   const un = e => dayOf(e.date) < 0;
-  if (X.some(un)) rows.push(`<tr><td>未分日期</td><td>${fmt(sum(e => K(e) && un(e) && e.method === "cash"))}</td><td>${fmt(sum(e => K(e) && un(e) && e.method === "card"))}</td><td>${fmt(sum(e => K(e) && un(e)))}${twdNote(un)}</td></tr>`);
-  rows.push(`<tr class="tot"><td>合計</td><td>${fmt(sum(e => K(e) && e.method === "cash"))}</td><td>${fmt(sum(e => K(e) && e.method === "card"))}</td><td>${fmt(krw)}${twdNote(() => true)}</td></tr>`);
-  document.getElementById("mDays").innerHTML = rows.join("");
+  const table = (C, title, withPlan) => {
+    const on = i => e => e.cur === C && (i < 0 ? un(e) : dayOf(e.date) === i);
+    const cell = (f, m) => fmt(sum(e => f(e) && (!m || e.method === m)));
+    const rows = days.map((d, i) => {
+      const c = sum(e => on(i)(e) && e.method === "cash"), k = sum(e => on(i)(e) && e.method === "card"), p = PLAN[i];
+      const pt = withPlan && p[1] ? `<small class="${c + k > p[1] ? "over" : ""}">預估 ${p[0] === p[1] ? fmt(p[0]) : fmt(p[0]) + "～" + fmt(p[1])}</small>` : "";
+      return `<tr><td>${DAYN[i]}</td><td>${fmt(c)}</td><td>${fmt(k)}</td><td>${fmt(c + k)}${pt}</td></tr>`;
+    });
+    if (X.some(on(-1))) rows.push(`<tr><td>未分日期</td><td>${cell(on(-1), "cash")}</td><td>${cell(on(-1), "card")}</td><td>${cell(on(-1))}</td></tr>`);
+    const all = e => e.cur === C;
+    rows.push(`<tr class="tot"><td>合計</td><td>${cell(all, "cash")}</td><td>${cell(all, "card")}</td><td>${cell(all)}</td></tr>`);
+    return `<div class="cur-title"><span>${title}</span><small>${C === "KRW" ? "單位：韓元" : "單位：台幣"}</small></div>
+      <table class="mtable"><thead><tr><th>日期</th><th>現金</th><th>刷卡</th><th>合計</th></tr></thead><tbody>${rows.join("")}</tbody></table>`;
+  };
+  document.getElementById("mDays").innerHTML = table("KRW", "韓元花費", true) + (X.some(T) ? table("TWD", "台幣花費", false) : "");
   // 分帳
   const ms = members_();
   let st = "";
